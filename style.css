@@ -1,0 +1,21 @@
+body {
+  height: 100vh;
+  width: 100%;
+}
+
+#fiducials {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+#fiducials > div {
+  align-items: center;
+  background: gainsboro;
+  display: flex;
+  font-size: 3rem;
+  height: 100px;
+  justify-content: center;
+  margin: 5px;
+  width: 100px;
+}

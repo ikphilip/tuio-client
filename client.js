@@ -22,7 +22,7 @@ const updateCurrentObjects = (session) => {
   newSessions = session.messages[1].sessionIds;
 
   // Cut short if there is nothing to do
-  if (newSessions == currentSessions) {
+  if (newSessions.length === currentSessions.length && newSessions === currentSessions) {
     console.log('No changes');
     return;
   }
