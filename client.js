@@ -1,13 +1,25 @@
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
+
+// constants
+const updateFreq = 1000;
 
 // Tracking variables
 let currentSessions = [];
 let currentObjects = {};
+let lastUpdate = 0;
 
 /**
 * Tracking function.
 */
 const updateCurrentObjects = (session) => {
+  // Update frequency
+  if (Date.now() - lastUpdate < updateFreq) {
+    return;
+  }
+
+  // Set current time
+  lastUpdate = Date.now();
+
   // Don't update if there is duplicate
   if (session.duplicate === true) {
     return;
@@ -37,11 +49,17 @@ const updateCurrentObjects = (session) => {
     }
   });
 
+  // Last seen
+  for (const key in currentObjects) {
+    currentObjects[key].time = lastUpdate;
+  }
+
   // Check for added objects
   newSessions.forEach((x) => {
     if (currentSessions.indexOf(x) < 0) {
       for (let y of session.messages) {
         if (y.type === 'set' && y.sessionId === x) {
+          y['time'] = Date.now();
           currentSessions.push(x);
           currentObjects[x] = y;
           addFiducial(currentObjects[x]);
@@ -54,6 +72,10 @@ const updateCurrentObjects = (session) => {
   });
 };
 
+// Front-end
+/**
+ * Add fiducial
+ */
 const addFiducial = (message) => {
   const fiducials = document.getElementById("fiducials");
   const newDiv = document.createElement('div');
@@ -63,6 +85,9 @@ const addFiducial = (message) => {
   fiducials.append(newDiv);
 };
 
+/**
+ * Remove fiducial
+ */
 const removeFiducial = (sessionId) => {
   const fiducial = document.getElementById(sessionId);
 
@@ -71,6 +96,9 @@ const removeFiducial = (sessionId) => {
   }
 };
 
+/**
+ * Remove all
+ */
 const removeAll = () => {
   let currentSessions = [];
   let currentObjects = {};
@@ -81,7 +109,4 @@ const removeAll = () => {
   console.log('remove all');
 };
 
-socket.on('tuio', (msg) => {
-  // @TODO Handle event logic when messages are received.
-  updateCurrentObjects(msg);
-});
+socket.on('tuio', updateCurrentObjects);
